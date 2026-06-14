@@ -1,0 +1,21 @@
+# dependencies
+node_modules
+
+# build output
+dist
+dist-ssr
+
+# local env / misc
+*.local
+.DS_Store
+.env
+.env.*
+
+# editor
+.vscode/*
+!.vscode/extensions.json
+.idea
+
+# claude code local settings
+.claude/settings.local.json
+.claude/*.lock

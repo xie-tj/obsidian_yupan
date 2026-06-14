@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OBSIDIAN · A股模拟交易复盘训练舱</title>
+    <script>
+      // 隐藏页面（后台标签/嵌入式预览）中浏览器会冻结 rAF，导致图表布局与动画停摆。
+      // 仅在 hidden 状态用 setTimeout(30fps) 兜底驱动；可见时直通原生 rAF，零开销。
+      // 必须在业务模块加载前注入：图表库在模块初始化时即捕获 rAF 引用。
+      ;(function () {
+        var nativeRaf = window.requestAnimationFrame.bind(window)
+        var nativeCaf = window.cancelAnimationFrame.bind(window)
+        window.requestAnimationFrame = function (cb) {
+          if (document.visibilityState === 'hidden') {
+            return setTimeout(function () { cb(performance.now()) }, 32)
+          }
+          return nativeRaf(cb)
+        }
+        window.cancelAnimationFrame = function (id) {
+          nativeCaf(id)
+          clearTimeout(id)
+        }
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
