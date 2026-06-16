@@ -42,39 +42,42 @@ export function DailyBlindTest() {
   const up = chgPct >= 0
 
   return (
-    <div className="grid h-full grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_22rem] xl:grid-rows-[minmax(0,1fr)]">
-      {/* ── 主图舱（xl 下随视口高度伸展，图表区吃掉全部富余空间）── */}
-      <GlassPanel className="flex min-h-[34rem] flex-col gap-3 px-5 py-4">
-        <header className="flex flex-wrap items-center gap-3">
-          <h2 className="font-mono text-[12px] tracking-[0.35em] text-neon-cyan glow-cyan">
-            BLIND BOX · 日线盲盒
+    <div className="flex min-h-[calc(100dvh_-_5.5rem)] flex-col gap-3 sm:gap-4 xl:grid xl:min-h-0 xl:h-full xl:grid-cols-[minmax(0,1fr)_22rem] xl:grid-rows-[minmax(0,1fr)]">
+      {/* ── 主图舱（手机端吃掉首屏富余空间，桌面端随视口高度伸展）── */}
+      <GlassPanel className="flex h-[56dvh] min-h-[22rem] shrink-0 flex-col gap-2 px-4 py-3 sm:gap-3 sm:px-5 sm:py-4 xl:h-auto xl:min-h-[34rem] xl:shrink">
+        <header className="flex items-center gap-x-2 gap-y-1 sm:flex-wrap sm:gap-3">
+          <h2 className="shrink-0 font-mono text-[11px] tracking-[0.16em] text-neon-cyan glow-cyan sm:text-[12px] sm:tracking-[0.35em]">
+            <span className="hidden sm:inline">BLIND BOX · </span>日线盲盒
           </h2>
-          <span className="rounded-md border border-neon-gold/40 px-2 py-0.5 font-mono text-[12px] text-neon-gold">
+          <span className="shrink-0 rounded-md border border-neon-gold/40 px-1.5 py-0.5 font-mono text-[11px] text-neon-gold sm:px-2 sm:text-[12px]">
             {daily.meta.boardLabel} ±{daily.meta.limitPct}%
           </span>
-          <span className="rounded-md border border-white/10 px-2 py-0.5 font-mono text-[12px] text-slate-400">
+          <span className="hidden rounded-md border border-white/10 px-2 py-0.5 font-mono text-[12px] text-slate-400 sm:inline-block">
             代码已隐藏 · 第 {daily.visibleCount} / {daily.bars.length} 个交易日
           </span>
 
-          <span className="ml-auto flex items-baseline gap-2 font-mono">
+          <span className="ml-auto flex shrink-0 items-baseline gap-1.5 font-mono sm:gap-2">
             <NumberTicker
               value={last.close}
               prefix="¥"
-              className={`text-xl font-bold ${up ? 'text-neon-red glow-red' : 'text-neon-green glow-green'}`}
+              className={`text-lg font-bold sm:text-xl ${up ? 'text-neon-red glow-red' : 'text-neon-green glow-green'}`}
             />
             <NumberTicker
               value={chgPct}
               suffix="%"
               signed
-              className={`text-sm ${up ? 'text-neon-red' : 'text-neon-green'}`}
+              className={`text-xs sm:text-sm ${up ? 'text-neon-red' : 'text-neon-green'}`}
             />
           </span>
         </header>
 
         <div className="flex flex-wrap items-center gap-2">
           <PlaybackControls playing={daily.playing} speed={daily.speed} onRestart={startDaily} />
-          <div className="mx-1 h-5 w-px bg-white/10" />
-          <IndicatorPanel />
+          {/* 指标配置为进阶功能：手机端首屏让位给图表，sm 及以上恢复 */}
+          <div className="mx-1 hidden h-5 w-px bg-white/10 sm:block" />
+          <div className="hidden items-center sm:flex">
+            <IndicatorPanel />
+          </div>
         </div>
 
         <div className="min-h-0 flex-1">
@@ -88,9 +91,12 @@ export function DailyBlindTest() {
       </GlassPanel>
 
       {/* ── 右侧资金 / 下单 / 流水 ─────────────────── */}
-      <div className="flex min-h-0 flex-col gap-4">
-        <AccountPanel />
-        <TradeDock disabled={daily.finished} />
+      <div className="flex min-h-0 flex-col gap-3 sm:gap-4">
+        {/* 手机端：下单(左) + 资金(右) 同行；xl 用 contents 透明化，回到 资金→下单→流水 纵向流 */}
+        <div className="grid grid-cols-[1fr_1.25fr] gap-3 xl:contents">
+          <AccountPanel className="order-2 xl:order-none" />
+          <TradeDock className="order-1 xl:order-none" disabled={daily.finished} />
+        </div>
         <TradeLog />
       </div>
 

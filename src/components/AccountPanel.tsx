@@ -1,4 +1,5 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
+import { motion } from 'framer-motion'
 import { useTradingStore } from '../store/useTradingStore'
 import { NumberTicker } from './NumberTicker'
 import { GlassPanel } from './GlassPanel'
@@ -16,26 +17,27 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
   )
 }
 
-export function AccountPanel() {
+export function AccountPanel({ className = '' }: { className?: string }) {
   const account = useTradingStore((s) => s.account)
+  const [showDetail, setShowDetail] = useState(false)
   if (!account) return null
 
   const { position } = account
   return (
-    <GlassPanel className="px-5 py-4" delay={0.08}>
-      <h3 className="mb-2 font-mono text-[12px] tracking-[0.35em] text-neon-cyan glow-cyan">
+    <GlassPanel className={`px-3 py-3 xl:px-5 xl:py-4 ${className}`} delay={0.08}>
+      <h3 className="mb-1.5 font-mono text-[12px] tracking-[0.12em] text-neon-cyan glow-cyan sm:mb-2 xl:tracking-[0.35em]">
         ACCOUNT · 资金舱
       </h3>
 
-      <div className="mb-1 flex items-baseline justify-between">
+      <div className="mb-1 flex flex-col xl:flex-row xl:items-baseline xl:justify-between">
         <span className="text-xs text-slate-400">总权益</span>
         <NumberTicker
           value={account.equity}
           prefix="¥"
-          className="font-mono text-2xl font-bold text-slate-100"
+          className="font-mono text-xl font-bold text-slate-100 xl:text-2xl"
         />
       </div>
-      <div className="mb-3 flex items-baseline justify-between">
+      <div className="mb-2 flex items-baseline justify-between sm:mb-3">
         <span className="text-xs text-slate-400">累计收益率</span>
         <NumberTicker
           value={account.returnPct * 100}
@@ -45,7 +47,22 @@ export function AccountPanel() {
         />
       </div>
 
-      <div className="border-t border-white/5 pt-2">
+      {/* 手机端：盈亏明细默认折叠，点按展开；桌面端（xl）恒展开、不显示此开关 */}
+      <motion.button
+        type="button"
+        onClick={() => setShowDetail((v) => !v)}
+        whileTap={{ scale: 0.97 }}
+        transition={{ type: 'spring', stiffness: 600, damping: 20 }}
+        aria-expanded={showDetail}
+        className="mb-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-white/10 py-1.5
+          font-mono text-[12px] tracking-wider text-slate-400 hover:border-neon-cyan/40 hover:text-neon-cyan xl:hidden"
+      >
+        {showDetail ? '收起明细 ▴' : '展开盈亏明细 ▾'}
+      </motion.button>
+
+      <div
+        className={`${showDetail ? 'grid' : 'hidden'} grid-cols-2 gap-x-4 border-t border-white/5 pt-2 xl:block`}
+      >
         <Row label="可用资金">
           <NumberTicker value={account.cash} prefix="¥" className="text-slate-200" />
         </Row>

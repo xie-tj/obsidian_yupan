@@ -110,7 +110,7 @@ export function TradeButton({ side, sub, disabled, onTrade }: TradeButtonProps) 
         whileTap={disabled ? undefined : { scale: 0.91 }}
         // 全局禁用线性过渡：所有状态切换都走弹簧
         transition={{ type: 'spring', stiffness: 650, damping: 22, mass: 0.8 }}
-        className={`relative w-full select-none overflow-hidden rounded-2xl px-6 py-4 text-left
+        className={`relative w-full select-none overflow-hidden rounded-2xl px-4 py-3 text-left xl:px-6 xl:py-4
           backdrop-blur-md ${disabled ? 'opacity-35 cursor-not-allowed' : 'cursor-pointer'}`}
       >
         {/* 指针跟随的曲面高光（screen 混合融入流体背景） */}
@@ -151,16 +151,18 @@ export function TradeButton({ side, sub, disabled, onTrade }: TradeButtonProps) 
 
         {/* 文字层抬升 30px，3D 倾斜时产生视差 */}
         <span
-          className="relative flex items-baseline gap-3"
+          className="relative flex flex-wrap items-baseline gap-x-3 gap-y-0.5"
           style={{ transform: 'translateZ(30px)' }}
         >
           <span
-            className="text-2xl font-bold tracking-widest"
+            className="text-xl font-bold tracking-widest xl:text-2xl"
             style={{ color: theme.base, textShadow: `0 0 14px ${theme.base.replace('1)', '0.8)')}` }}
           >
             {theme.label}
           </span>
-          <span className="font-mono text-[12px] tracking-[0.3em] text-slate-400">{theme.en}</span>
+          <span className="hidden font-mono text-[12px] tracking-[0.3em] text-slate-400 xl:inline">
+            {theme.en}
+          </span>
           {sub && <span className="ml-auto font-mono text-xs text-slate-300">{sub}</span>}
         </span>
       </motion.button>

@@ -355,10 +355,10 @@ export function KLineChart({ bars, visibleCount, trades, board, className }: KLi
       subKeyRef.current = key
     }
 
-    // 窗格高度权重：主图 : 量 : 各副图 ≈ 3 : 0.7 : 1.1
+    // 窗格高度权重：主图 : 量 : 各副图 ≈ 3.4 : 0.5 : 1.1（兜底主图≥40% / 量≥10%）
     const panes = chart.panes()
-    panes[0]?.setStretchFactor(3000)
-    panes[1]?.setStretchFactor(700)
+    panes[0]?.setStretchFactor(3400)
+    panes[1]?.setStretchFactor(500)
     for (let i = 2; i < panes.length; i++) panes[i]?.setStretchFactor(1100)
   }, [cfg.main, cfg.maLines, cfg.subs])
 

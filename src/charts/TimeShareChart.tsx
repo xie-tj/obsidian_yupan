@@ -65,7 +65,7 @@ export function TimeShareChart({
       const padL = 56
       const padR = 56
       const padT = 14
-      const volH = H * 0.16 // 底部成交量区
+      const volH = H * 0.12 // 底部成交量区
       const priceH = H - padT - volH - 26
       const plotW = W - padL - padR
 

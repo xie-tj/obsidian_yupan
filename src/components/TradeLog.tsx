@@ -5,7 +5,7 @@ import { minuteLabel } from '../core/data/generator'
 import type { TradeRecord } from '../core/engine/types'
 
 /** 交易流水：最新成交在顶部，逐条弹簧滑入，可滚动 */
-export function TradeLog() {
+export function TradeLog({ className = '' }: { className?: string }) {
   const account = useTradingStore((s) => s.account)
   const mode = useTradingStore((s) => s.mode)
   if (!account) return null
@@ -15,7 +15,7 @@ export function TradeLog() {
     mode === 'daily' ? `第${t.barIndex + 1}日` : minuteLabel(t.time)
 
   return (
-    <GlassPanel className="flex min-h-[10rem] flex-1 flex-col px-5 py-4" delay={0.24}>
+    <GlassPanel className={`flex min-h-[7rem] flex-1 flex-col px-5 py-4 sm:min-h-[10rem] ${className}`} delay={0.24}>
       <h3 className="mb-2 shrink-0 font-mono text-[12px] tracking-[0.35em] text-neon-gold glow-gold">
         LOG · 交易流水
       </h3>

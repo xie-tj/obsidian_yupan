@@ -39,30 +39,30 @@ export function IntradayTraining() {
   const up = chgPct >= 0
 
   return (
-    <div className="grid h-full grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_22rem] xl:grid-rows-[minmax(0,1fr)]">
-      <GlassPanel className="flex min-h-[34rem] flex-col gap-3 px-5 py-4">
-        <header className="flex flex-wrap items-center gap-3">
-          <h2 className="font-mono text-[12px] tracking-[0.35em] text-neon-violet">
-            INTRADAY · 分时 T+0 训练
+    <div className="flex min-h-[calc(100dvh_-_5.5rem)] flex-col gap-3 sm:gap-4 xl:grid xl:min-h-0 xl:h-full xl:grid-cols-[minmax(0,1fr)_22rem] xl:grid-rows-[minmax(0,1fr)]">
+      <GlassPanel className="flex h-[56dvh] min-h-[22rem] shrink-0 flex-col gap-2 px-4 py-3 sm:gap-3 sm:px-5 sm:py-4 xl:h-auto xl:min-h-[34rem] xl:shrink">
+        <header className="flex items-center gap-x-2 gap-y-1 sm:flex-wrap sm:gap-3">
+          <h2 className="shrink-0 font-mono text-[11px] tracking-[0.16em] text-neon-violet sm:text-[12px] sm:tracking-[0.35em]">
+            <span className="hidden sm:inline">INTRADAY · </span>分时训练
           </h2>
-          <span className="rounded-md border border-neon-gold/40 px-2 py-0.5 font-mono text-[12px] text-neon-gold">
+          <span className="shrink-0 rounded-md border border-neon-gold/40 px-1.5 py-0.5 font-mono text-[11px] text-neon-gold sm:px-2 sm:text-[12px]">
             {intraday.meta.boardLabel} ±{intraday.meta.limitPct}%
           </span>
-          <span className="rounded-md border border-white/10 px-2 py-0.5 font-mono text-[12px] text-slate-400">
+          <span className="hidden rounded-md border border-white/10 px-2 py-0.5 font-mono text-[12px] text-slate-400 sm:inline-block">
             昨收 ¥{intraday.prevClose.toFixed(2)} · {minuteLabel(last.minute)}
           </span>
 
-          <span className="ml-auto flex items-baseline gap-2 font-mono">
+          <span className="ml-auto flex shrink-0 items-baseline gap-1.5 font-mono sm:gap-2">
             <NumberTicker
               value={last.price}
               prefix="¥"
-              className={`text-xl font-bold ${up ? 'text-neon-red glow-red' : 'text-neon-green glow-green'}`}
+              className={`text-lg font-bold sm:text-xl ${up ? 'text-neon-red glow-red' : 'text-neon-green glow-green'}`}
             />
             <NumberTicker
               value={chgPct}
               suffix="%"
               signed
-              className={`text-sm ${up ? 'text-neon-red' : 'text-neon-green'}`}
+              className={`text-xs sm:text-sm ${up ? 'text-neon-red' : 'text-neon-green'}`}
             />
           </span>
         </header>
@@ -80,9 +80,12 @@ export function IntradayTraining() {
         </div>
       </GlassPanel>
 
-      <div className="flex min-h-0 flex-col gap-4">
-        <AccountPanel />
-        <TradeDock disabled={intraday.finished} />
+      <div className="flex min-h-0 flex-col gap-3 sm:gap-4">
+        {/* 手机端：下单(左) + 资金(右) 同行；xl 用 contents 透明化，回到 资金→下单→流水 纵向流 */}
+        <div className="grid grid-cols-[1fr_1.25fr] gap-3 xl:contents">
+          <AccountPanel className="order-2 xl:order-none" />
+          <TradeDock className="order-1 xl:order-none" disabled={intraday.finished} />
+        </div>
         <TradeLog />
       </div>
 
