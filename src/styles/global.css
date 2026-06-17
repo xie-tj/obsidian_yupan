@@ -63,6 +63,12 @@ body {
 
 ::selection { background: rgba(34, 230, 255, 0.25); }
 
+/* Tutorial spotlight: bump target element above the dimming overlay */
+.tutorial-spotlight-target {
+  position: relative !important;
+  z-index: 57 !important;
+}
+
 /* lightweight-charts 水印/边框去除后的容器辉光 */
 .chart-shell {
   position: relative;

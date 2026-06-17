@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useState } from 'react'
+import { Suspense, lazy, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { DailyBlindTest } from './modules/DailyBlindTest'
 import { IntradayTraining } from './modules/IntradayTraining'
@@ -7,6 +7,7 @@ import { Onboarding } from './components/Onboarding'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { useTradingStore, type Mode } from './store/useTradingStore'
 import { useOrderStore } from './store/useOrderStore'
+import { useTutorialStore, ONBOARDED_KEY } from './store/useTutorialStore'
 
 // Three.js 流体背景纯装饰，从首屏关键路径懒加载（~600KB 不阻塞首次绘制）
 const FluidBackground = lazy(() =>
@@ -18,8 +19,6 @@ const STATIC_NEBULA =
   'radial-gradient(60rem 40rem at 18% 8%, rgba(20,120,160,0.16), transparent 60%),' +
   'radial-gradient(50rem 36rem at 85% 90%, rgba(150,60,30,0.10), transparent 65%),' +
   'radial-gradient(40rem 30rem at 70% 25%, rgba(34,230,255,0.05), transparent 60%), #05070d'
-
-const ONBOARDED_KEY = 'obsidian-onboarded'
 
 /**
  * 全局快捷键：空格 播放/暂停 · → / . 步进 · N 新盲盒 · B 买入 · S 卖出
@@ -76,19 +75,13 @@ export default function App() {
   const setMode = useTradingStore((s) => s.setMode)
   const startDaily = useTradingStore((s) => s.startDaily)
   const startIntraday = useTradingStore((s) => s.startIntraday)
-  const [showGuide, setShowGuide] = useState(false)
+  const startTutorial = useTutorialStore((s) => s.start)
 
   usePlaybackHotkeys()
 
-  // 首访自动弹引导（localStorage 标记一次）
   useEffect(() => {
-    if (!localStorage.getItem(ONBOARDED_KEY)) setShowGuide(true)
-  }, [])
-
-  const closeGuide = () => {
-    setShowGuide(false)
-    localStorage.setItem(ONBOARDED_KEY, '1')
-  }
+    if (!localStorage.getItem(ONBOARDED_KEY)) startTutorial()
+  }, [startTutorial])
 
   return (
     <div className="relative min-h-screen">
@@ -163,7 +156,7 @@ export default function App() {
               <span className="hidden sm:inline">开源</span>
             </motion.a>
             <motion.button
-              onClick={() => setShowGuide(true)}
+              onClick={startTutorial}
               whileHover={{ scale: 1.12 }}
               whileTap={{ scale: 0.9 }}
               transition={{ type: 'spring', stiffness: 600, damping: 18 }}
@@ -193,7 +186,7 @@ export default function App() {
       </div>
 
       <ToastLayer />
-      <Onboarding open={showGuide} onClose={closeGuide} />
+      <Onboarding />
     </div>
   )
 }

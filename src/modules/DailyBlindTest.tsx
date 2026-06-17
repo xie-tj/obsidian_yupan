@@ -50,7 +50,7 @@ export function DailyBlindTest() {
   return (
     <div className="flex min-h-[calc(100dvh_-_5.5rem)] flex-col gap-3 sm:gap-4 xl:grid xl:min-h-0 xl:h-full xl:grid-cols-[minmax(0,1fr)_22rem] xl:grid-rows-[minmax(0,1fr)]">
       {/* ── 主图舱（手机端吃掉首屏富余空间，桌面端随视口高度伸展）── */}
-      <GlassPanel className="flex h-[56dvh] min-h-[22rem] shrink-0 flex-col gap-2 px-4 py-3 sm:gap-3 sm:px-5 sm:py-4 xl:h-auto xl:min-h-[34rem] xl:shrink">
+      <GlassPanel id="tutorial-chart" className="flex h-[56dvh] min-h-[22rem] shrink-0 flex-col gap-2 px-4 py-3 sm:gap-3 sm:px-5 sm:py-4 xl:h-auto xl:min-h-[34rem] xl:shrink">
         <header className="flex items-center gap-x-2 gap-y-1 sm:flex-wrap sm:gap-3">
           <h2 className="shrink-0 font-mono text-[11px] tracking-[0.16em] text-neon-cyan glow-cyan sm:text-[12px] sm:tracking-[0.35em]">
             <span className="hidden sm:inline">BLIND BOX · </span>日线盲盒

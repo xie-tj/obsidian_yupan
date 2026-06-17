@@ -106,18 +106,22 @@ export function TradeDock({
       )}
 
       <div className="grid grid-cols-1 gap-2 xl:grid-cols-2 xl:gap-3">
-        <TradeButton
-          side="buy"
-          disabled={disabled || maxBuy < 100}
-          sub={fullPosition ? `满仓 ${maxBuy} 股` : `可买 ${maxBuy} 股`}
-          onTrade={() => (fullPosition ? buyMax() : buy(qty))}
-        />
-        <TradeButton
-          side="sell"
-          disabled={disabled || sellable < 100}
-          sub={fullPosition ? `清仓 ${sellable} 股` : `可卖 ${sellable} 股`}
-          onTrade={() => (fullPosition ? sellAll() : sell(qty))}
-        />
+        <div id="tutorial-buy">
+          <TradeButton
+            side="buy"
+            disabled={disabled || maxBuy < 100}
+            sub={fullPosition ? `满仓 ${maxBuy} 股` : `可买 ${maxBuy} 股`}
+            onTrade={() => (fullPosition ? buyMax() : buy(qty))}
+          />
+        </div>
+        <div id="tutorial-sell">
+          <TradeButton
+            side="sell"
+            disabled={disabled || sellable < 100}
+            sub={fullPosition ? `清仓 ${sellable} 股` : `可卖 ${sellable} 股`}
+            onTrade={() => (fullPosition ? sellAll() : sell(qty))}
+          />
+        </div>
       </div>
 
       <p className="mt-3 hidden text-[12px] leading-relaxed text-slate-500 sm:block">

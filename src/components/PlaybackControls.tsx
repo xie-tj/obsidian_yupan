@@ -125,13 +125,15 @@ export function PlaybackControls({
         ]
 
   return (
-    <div className="flex items-center gap-2">
+    <div id="tutorial-playback" className="flex items-center gap-2">
       <CtrlButton active={playing} onClick={() => setPlaying(!playing)} title="自动播放 / 暂停">
         {playing ? '⏸ 暂停' : '▶ 播放'}
       </CtrlButton>
-      <CtrlButton onClick={step} title={mode === 'daily' ? '步进一个交易日' : '步进一分钟'}>
-        ⏭ 步进
-      </CtrlButton>
+      <span id="tutorial-step-btn">
+        <CtrlButton onClick={step} title={mode === 'daily' ? '步进一个交易日' : '步进一分钟'}>
+          ⏭ 步进
+        </CtrlButton>
+      </span>
       <SpeedPicker speeds={speeds} current={speed} onChange={setSpeed} />
       <CtrlButton onClick={onRestart} title="换一段新行情">
         ↻ 新盲盒

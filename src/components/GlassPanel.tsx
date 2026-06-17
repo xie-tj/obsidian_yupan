@@ -4,14 +4,16 @@ import type { ReactNode } from 'react'
 interface GlassPanelProps {
   children: ReactNode
   className?: string
+  id?: string
   /** 入场延迟，做面板级联弹入 */
   delay?: number
 }
 
 /** 玻璃拟物面板：弹簧入场（无线性过渡） */
-export function GlassPanel({ children, className = '', delay = 0 }: GlassPanelProps) {
+export function GlassPanel({ children, className = '', id, delay = 0 }: GlassPanelProps) {
   return (
     <motion.section
+      id={id}
       className={`glass ${className}`}
       initial={{ opacity: 0, y: 28, scale: 0.97 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
