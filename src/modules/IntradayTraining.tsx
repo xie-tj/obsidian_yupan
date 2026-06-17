@@ -18,13 +18,16 @@ import { minuteLabel } from '../core/data/generator'
  * 先卖后买 / 先买后卖均可，但当日新买入部分依旧 T+1 冻结。
  */
 export function IntradayTraining() {
+  const mode = useTradingStore((s) => s.mode)
   const intraday = useTradingStore((s) => s.intraday)
   const account = useTradingStore((s) => s.account)
   const startIntraday = useTradingStore((s) => s.startIntraday)
 
   useEffect(() => {
-    if (!intraday) startIntraday()
-  }, [intraday, startIntraday])
+    if (mode === 'intraday' && !intraday) {
+      try { startIntraday() } catch { setTimeout(startIntraday, 500) }
+    }
+  }, [mode, intraday, startIntraday])
 
   useEffect(() => {
     if (!intraday?.playing) return
@@ -32,7 +35,11 @@ export function IntradayTraining() {
     return () => clearInterval(id)
   }, [intraday?.playing, intraday?.speed])
 
-  if (!intraday || !account) return null
+  if (!intraday || !account) return (
+    <div className="flex h-[56dvh] items-center justify-center">
+      <span className="animate-pulse font-mono text-sm text-slate-500">正在生成行情…</span>
+    </div>
+  )
 
   const last = intraday.points[intraday.visibleCount - 1]
   const chgPct = (last.price / intraday.prevClose - 1) * 100

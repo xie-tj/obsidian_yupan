@@ -362,20 +362,25 @@ export const useTradingStore = create<TradingStore>((set, get) => {
     },
 
     startDaily: () => {
-      // 先用合成行情瞬时开局（保证响应），同时异步尝试真实历史数据，成功则无缝替换
-      const token = ++startToken
-      const meta = rollBlindBoxMeta()
-      const bars = genDailySeries(meta.board)
-      engine = new TradingEngine({ initialCash: INITIAL_CASH_DAILY, board: meta.board })
-      set({
-        mode: 'daily',
-        daily: { meta, bars, visibleCount: DAILY_WARMUP, playing: false, speed: 600, finished: false },
-      })
-      refresh()
-      saveSession(true)
+      let token: number
+      try {
+        token = ++startToken
+        const meta = rollBlindBoxMeta()
+        const bars = genDailySeries(meta.board)
+        engine = new TradingEngine({ initialCash: INITIAL_CASH_DAILY, board: meta.board })
+        set({
+          mode: 'daily',
+          daily: { meta, bars, visibleCount: DAILY_WARMUP, playing: false, speed: 600, finished: false },
+        })
+        refresh()
+        saveSession(true)
+      } catch {
+        engine = null
+        set({ mode: 'daily', daily: null, account: null })
+        return
+      }
 
       void loadDailyDataset().then((real) => {
-        // 仅当用户仍停留在这一局（无新开局 / 未切换模式 / 未开始操作）时才替换
         const s = get()
         if (!real || token !== startToken || s.mode !== 'daily') return
         if (s.daily && (s.daily.visibleCount !== DAILY_WARMUP || s.daily.finished)) return
@@ -393,26 +398,30 @@ export const useTradingStore = create<TradingStore>((set, get) => {
         })
         refresh()
         saveSession(true)
-      })
+      }).catch(() => { /* synthetic data already active */ })
     },
 
     startIntraday: () => {
-      const meta = rollBlindBoxMeta()
-      const prevClose = Math.round((6 + Math.random() * 40) * 100) / 100
-      const points = genMinuteSeries(prevClose, meta.board)
-      // 底仓 = 昨日已持有、今日可卖 → 训练日内 T+0（先卖后买 / 先买后卖做差价）
-      const baseQty = Math.max(100, Math.floor(INITIAL_CASH_INTRADAY / prevClose / 200) * 100)
-      engine = new TradingEngine({
-        initialCash: INITIAL_CASH_INTRADAY,
-        board: meta.board,
-        basePosition: { qty: baseQty, cost: prevClose },
-      })
-      set({
-        mode: 'intraday',
-        intraday: { meta, prevClose, points, visibleCount: 1, playing: true, speed: 120, finished: false },
-      })
-      refresh()
-      saveSession(true)
+      try {
+        const meta = rollBlindBoxMeta()
+        const prevClose = Math.round((6 + Math.random() * 40) * 100) / 100
+        const points = genMinuteSeries(prevClose, meta.board)
+        const baseQty = Math.max(100, Math.floor(INITIAL_CASH_INTRADAY / prevClose / 200) * 100)
+        engine = new TradingEngine({
+          initialCash: INITIAL_CASH_INTRADAY,
+          board: meta.board,
+          basePosition: { qty: baseQty, cost: prevClose },
+        })
+        set({
+          mode: 'intraday',
+          intraday: { meta, prevClose, points, visibleCount: 1, playing: true, speed: 120, finished: false },
+        })
+        refresh()
+        saveSession(true)
+      } catch {
+        engine = null
+        set({ mode: 'intraday', intraday: null, account: null })
+      }
     },
 
     setPlaying: (playing) => {

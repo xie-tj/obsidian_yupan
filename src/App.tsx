@@ -4,6 +4,7 @@ import { DailyBlindTest } from './modules/DailyBlindTest'
 import { IntradayTraining } from './modules/IntradayTraining'
 import { ToastLayer } from './components/ToastLayer'
 import { Onboarding } from './components/Onboarding'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { useTradingStore, type Mode } from './store/useTradingStore'
 import { useOrderStore } from './store/useOrderStore'
 
@@ -73,6 +74,8 @@ const TABS: Array<{ key: Mode; label: string; en: string }> = [
 export default function App() {
   const mode = useTradingStore((s) => s.mode)
   const setMode = useTradingStore((s) => s.setMode)
+  const startDaily = useTradingStore((s) => s.startDaily)
+  const startIntraday = useTradingStore((s) => s.startIntraday)
   const [showGuide, setShowGuide] = useState(false)
 
   usePlaybackHotkeys()
@@ -182,7 +185,9 @@ export default function App() {
             exit={{ opacity: 0, y: -20, scale: 0.99 }}
             transition={{ type: 'spring', stiffness: 200, damping: 24, mass: 0.9 }}
           >
-            {mode === 'daily' ? <DailyBlindTest /> : <IntradayTraining />}
+            <ErrorBoundary onRetry={mode === 'daily' ? startDaily : startIntraday}>
+              {mode === 'daily' ? <DailyBlindTest /> : <IntradayTraining />}
+            </ErrorBoundary>
           </motion.main>
         </AnimatePresence>
       </div>

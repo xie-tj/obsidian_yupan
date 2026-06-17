@@ -17,14 +17,16 @@ import { TradeLog } from '../components/TradeLog'
  * 自动播放 / 暂停 / 步进推演，每根新 K 线 = 跨一个交易日（触发 T+1 解冻）。
  */
 export function DailyBlindTest() {
+  const mode = useTradingStore((s) => s.mode)
   const daily = useTradingStore((s) => s.daily)
   const account = useTradingStore((s) => s.account)
   const startDaily = useTradingStore((s) => s.startDaily)
 
-  // 首次进入自动开局
   useEffect(() => {
-    if (!daily) startDaily()
-  }, [daily, startDaily])
+    if (mode === 'daily' && !daily) {
+      try { startDaily() } catch { setTimeout(startDaily, 500) }
+    }
+  }, [mode, daily, startDaily])
 
   // 自动播放心跳
   useEffect(() => {
@@ -33,7 +35,11 @@ export function DailyBlindTest() {
     return () => clearInterval(id)
   }, [daily?.playing, daily?.speed])
 
-  if (!daily || !account) return null
+  if (!daily || !account) return (
+    <div className="flex h-[56dvh] items-center justify-center">
+      <span className="animate-pulse font-mono text-sm text-slate-500">正在生成行情…</span>
+    </div>
+  )
 
   const i = daily.visibleCount - 1
   const last = daily.bars[i]
