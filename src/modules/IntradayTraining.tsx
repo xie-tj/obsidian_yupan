@@ -14,8 +14,8 @@ import { minuteLabel } from '../core/data/generator'
  * 模块二 · 单日分时训练
  *
  * 还原 9:30-11:30 / 13:00-15:00 交易时段的分时推演。
- * 开局自带"昨日底仓"（已解冻可卖）→ 可练日内 T+0 做差价：
- * 先卖后买 / 先买后卖均可，但当日新买入部分依旧 T+1 冻结。
+ * 开局自带"昨日底仓"（已解冻可卖）→ 完整日内 T+0：
+ * 先卖后买 / 先买后卖均可，当日买入即可卖出，支持反复 BS 做差价。
  */
 export function IntradayTraining() {
   const mode = useTradingStore((s) => s.mode)

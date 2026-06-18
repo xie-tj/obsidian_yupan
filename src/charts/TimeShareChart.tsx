@@ -45,17 +45,20 @@ export function TimeShareChart({
     if (!ctx) return
 
     let raf = 0
-    const ro = new ResizeObserver(() => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2)
-      canvas.width = Math.max(1, Math.round(canvas.clientWidth * dpr))
-      canvas.height = Math.max(1, Math.round(canvas.clientHeight * dpr))
-    })
-    ro.observe(canvas)
 
     const draw = (now: number) => {
       raf = requestAnimationFrame(draw)
       const { points, visibleCount, prevClose, board, trades } = stateRef.current
       const dpr = Math.min(window.devicePixelRatio || 1, 2)
+      // 每帧按 CSS 盒子校准缓冲区，不依赖 ResizeObserver：切换模式入场、后台标签、iframe 等
+      // 场景下 RO 可能延迟或根本不触发，会让画布卡在 300×150 默认尺寸（分时画面“加载不出来”）。
+      // 仅在尺寸真正变化时重设（重设会清空画布，但紧随其后即整帧重绘，无副作用）。
+      const needW = Math.max(1, Math.round(canvas.clientWidth * dpr))
+      const needH = Math.max(1, Math.round(canvas.clientHeight * dpr))
+      if (canvas.width !== needW || canvas.height !== needH) {
+        canvas.width = needW
+        canvas.height = needH
+      }
       const W = canvas.width / dpr
       const H = canvas.height / dpr
       if (W < 10 || H < 10) return
@@ -241,7 +244,6 @@ export function TimeShareChart({
     raf = requestAnimationFrame(draw)
     return () => {
       cancelAnimationFrame(raf)
-      ro.disconnect()
     }
   }, [])
 

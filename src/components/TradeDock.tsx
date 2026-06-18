@@ -23,6 +23,7 @@ export function TradeDock({
   const sellAll = useTradingStore((s) => s.sellAll)
   const maxBuyQty = useTradingStore((s) => s.maxBuyQty)
   const account = useTradingStore((s) => s.account)
+  const mode = useTradingStore((s) => s.mode)
 
   const fullPosition = useOrderStore((s) => s.fullPosition)
   const setFullPosition = useOrderStore((s) => s.setFullPosition)
@@ -127,7 +128,9 @@ export function TradeDock({
       <p className="mt-3 hidden text-[12px] leading-relaxed text-slate-500 sm:block">
         {fullPosition
           ? '全仓模式：买入即满仓、卖出即清仓 · 快捷键 B 买 / S 卖'
-          : 'T+1：今日买入次日才可卖出 · 封死涨/跌停时对应方向委托不会成交'}
+          : mode === 'intraday'
+            ? 'T+0：当日买入即可卖、可反复买卖 · 封死涨/跌停时对应方向委托不会成交'
+            : 'T+1：今日买入次日才可卖出 · 封死涨/跌停时对应方向委托不会成交'}
         {' · '}费用 = 佣金万2.5（最低5元）+ 卖出印花税0.05% + 过户费0.001%
       </p>
     </GlassPanel>

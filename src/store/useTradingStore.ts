@@ -159,17 +159,52 @@ function winRateOf(trades: TradeRecord[]): number {
   return sells.filter((t) => (t.realizedPnl ?? 0) > 0).length / sells.length
 }
 
-/** 日线一局收尾：买入持有基准 = 开局首根可交易收盘 → 末根收盘；理论最佳 = 区间最高收盘 */
+/**
+ * 日线 T+1 理论最优：DP 求多次买卖的复合最优收益（在 log 空间做加法 = 乘法复合）。
+ * 约束：买入当日不可卖出（T+1），卖出当日可立即再买入。
+ * 三状态：cash（空仓）、fresh（今日买入，冻结）、held（持仓可卖）。
+ */
+function dailyOptimalReturn(bars: KBar[], startIdx: number): number {
+  const n = bars.length
+  if (startIdx >= n - 1) return 0
+  let cash = 0
+  let fresh = -Math.log(bars[startIdx].close)
+  let held = -Infinity
+  for (let i = startIdx + 1; i < n; i++) {
+    const lp = Math.log(bars[i].close)
+    const newHeld = Math.max(held, fresh)
+    const newCash = Math.max(cash, newHeld + lp)
+    fresh = newCash - lp
+    cash = newCash
+    held = newHeld
+  }
+  const lastLp = Math.log(bars[n - 1].close)
+  return Math.exp(Math.max(cash, held + lastLp, fresh + lastLp)) - 1
+}
+
+/**
+ * 分时 T+0 理论最优：全知交易者捕捉每一段正向波动，累乘复合收益。
+ * 开盘跳空不可避免（底仓在手，首个可交易价 = points[0]）。
+ */
+function intradayOptimalReturn(points: MinutePoint[], prevClose: number): number {
+  if (!points.length) return 0
+  let eq = points[0].price / prevClose
+  for (let i = 1; i < points.length; i++) {
+    const ratio = points[i].price / points[i - 1].price
+    if (ratio > 1) eq *= ratio
+  }
+  return eq - 1
+}
+
+/** 日线一局收尾：买入持有基准 = 开局首根可交易收盘 → 末根收盘；理论最佳 = 多次交易复合最优 */
 function buildDailyResult(d: DailySession, acc: AccountSnap): SessionResult {
   const entry = d.bars[DAILY_WARMUP - 1].close
   const end = d.bars[d.bars.length - 1].close
-  let maxClose = entry
-  for (let i = DAILY_WARMUP - 1; i < d.bars.length; i++) maxClose = Math.max(maxClose, d.bars[i].close)
   const benchmarkPct = end / entry - 1
   return {
     returnPct: acc.returnPct,
     benchmarkPct,
-    maxFavorablePct: maxClose / entry - 1,
+    maxFavorablePct: dailyOptimalReturn(d.bars, DAILY_WARMUP - 1),
     beatBenchmark: acc.returnPct >= benchmarkPct,
     trades: acc.trades.length,
     winRate: winRateOf(acc.trades),
@@ -184,16 +219,14 @@ function buildDailyResult(d: DailySession, acc: AccountSnap): SessionResult {
   }
 }
 
-/** 分时一局收尾：基准 = 底仓持有到收盘（昨收→收盘）；理论最佳 = 日内最高价 */
+/** 分时一局收尾：基准 = 底仓持有到收盘（昨收→收盘）；理论最佳 = T+0 全波段累乘最优 */
 function buildIntradayResult(t: IntradaySession, acc: AccountSnap): SessionResult {
   const end = t.points[t.points.length - 1].price
-  let maxPrice = t.prevClose
-  for (const p of t.points) maxPrice = Math.max(maxPrice, p.price)
   const benchmarkPct = end / t.prevClose - 1
   return {
     returnPct: acc.returnPct,
     benchmarkPct,
-    maxFavorablePct: maxPrice / t.prevClose - 1,
+    maxFavorablePct: intradayOptimalReturn(t.points, t.prevClose),
     beatBenchmark: acc.returnPct >= benchmarkPct,
     trades: acc.trades.length,
     winRate: winRateOf(acc.trades),
@@ -411,6 +444,7 @@ export const useTradingStore = create<TradingStore>((set, get) => {
           initialCash: INITIAL_CASH_INTRADAY,
           board: meta.board,
           basePosition: { qty: baseQty, cost: prevClose },
+          tPlus0: true, // 分时为日内 T+0：当日买入即可卖，可反复 BS
         })
         set({
           mode: 'intraday',

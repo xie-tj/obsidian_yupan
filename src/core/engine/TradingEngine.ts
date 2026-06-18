@@ -18,6 +18,8 @@ export interface EngineOptions {
   fees?: FeeConfig
   /** 初始底仓（用于分时 T+0 训练：昨日持仓今日可卖） */
   basePosition?: { qty: number; cost: number }
+  /** T+0 模式（分时训练）：当日买入即可卖出，可无限次反复买卖；默认 false = T+1 */
+  tPlus0?: boolean
 }
 
 /**
@@ -37,6 +39,8 @@ export class TradingEngine {
   readonly board: BoardType
   readonly isST: boolean
   readonly fees: FeeConfig
+  /** true = T+0（当日买入即可卖），false = T+1（次日解冻） */
+  readonly tPlus0: boolean
   position: Position
   trades: TradeRecord[] = []
   realizedPnl = 0
@@ -49,6 +53,7 @@ export class TradingEngine {
     this.board = opts.board
     this.isST = opts.isST ?? false
     this.fees = opts.fees ?? DEFAULT_FEES
+    this.tPlus0 = opts.tPlus0 ?? false
     const base = opts.basePosition
     this.initialEquity = opts.initialCash + (base ? base.qty * base.cost : 0)
     this.position = {
@@ -114,7 +119,8 @@ export class TradingEngine {
     const newTotal = pos.totalQty + qty
     pos.avgCost = (pos.avgCost * pos.totalQty + cost.total) / newTotal
     pos.totalQty = newTotal
-    pos.todayBuyQty += qty // T+1：今日买入不增加 sellableQty
+    if (this.tPlus0) pos.sellableQty += qty // T+0：当日买入即可卖
+    else pos.todayBuyQty += qty // T+1：今日买入次日解冻，不增加 sellableQty
     this.cash = round2(this.cash - cost.total)
     this.totalFees = round2(this.totalFees + cost.totalFee)
 
@@ -186,6 +192,7 @@ export class TradingEngine {
       board: this.board,
       isST: this.isST,
       fees: this.fees,
+      tPlus0: this.tPlus0,
       cash: this.cash,
       position: this.position,
       trades: this.trades,
@@ -202,6 +209,7 @@ export class TradingEngine {
       board: d.board,
       isST: d.isST,
       fees: d.fees,
+      tPlus0: d.tPlus0,
     })
     ;(e as { initialEquity: number }).initialEquity = d.initialEquity
     e.cash = d.cash
